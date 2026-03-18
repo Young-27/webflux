@@ -1,8 +1,7 @@
-package org.example.webflux;
+package org.example.webflux.chapter1;
 
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import static reactor.core.publisher.Flux.create;
@@ -21,7 +20,7 @@ public class SubscriberPublisherAsyncTest {
                 sink.next(i);
             }
             sink.complete();
-        }).publish() // 바로 구독도 가능
+        }).publish() // 바로 발행도 가능
                 .subscribeOn(Schedulers.boundedElastic());
         // Flux로 어떻게 블로킹을 회피할 수 있을까?
         // => 스레드 1개만 사용해서는 절대로 블로킹을 회피할 수 없다.
