@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.ArrayList;
@@ -15,21 +16,41 @@ import java.util.List;
 @Slf4j
 public class ReactiveProgrammingExampleController {
 
+    @RequestMapping(value = "/onenine/legecy")
+    public Mono<List<Integer>> produceOneToNineLegecy() {
+        return Mono.fromCallable(() -> {
+            List<Integer> sink = new ArrayList<>();
+            for (int i = 1; i <= 9; i++) {
+                try {
+                    Thread.sleep(500); // 0.5초 동안 스레드를 멈춤
+
+                    // 니즈 발생: 0.5초 동안 처리되는 데이터를 4.5초 이후에 한번에 보여주지 말고, 데이터가 처리 될 때 마다 바로바로 보여주세요
+                    // 개발자: 동기적인 자료형(List)로는 불가... => flux 사용
+                } catch (Exception e) {
+                }
+                sink.add(i);
+            } // 4.5초 소요
+            return sink;
+        }).subscribeOn(Schedulers.boundedElastic());
+    }
+
     // 1~9까지 출력하는 api
     @RequestMapping(value = "/onenine/list")
-    public List<Integer> produceOneToNine() {
-        List<Integer> sink = new ArrayList<>();
-        for (int i = 1; i <= 9; i++) {
-            try {
-                Thread.sleep(500); // 0.5초 동안 스레드를 멈춤
+    public Mono<List<Integer>> produceOneToNine() {
+        return Mono.defer(() -> {
+            List<Integer> sink = new ArrayList<>();
+            for (int i = 1; i <= 9; i++) {
+                try {
+                    Thread.sleep(500); // 0.5초 동안 스레드를 멈춤
 
-                // 니즈 발생: 0.5초 동안 처리되는 데이터를 4.5초 이후에 한번에 보여주지 말고, 데이터가 처리 될 때 마다 바로바로 보여주세요
-                // 개발자: 동기적인 자료형(List)로는 불가... => flux 사용
-            } catch (Exception e) {
-            }
-            sink.add(i);
-        } // 4.5초 소요
-        return sink;
+                    // 니즈 발생: 0.5초 동안 처리되는 데이터를 4.5초 이후에 한번에 보여주지 말고, 데이터가 처리 될 때 마다 바로바로 보여주세요
+                    // 개발자: 동기적인 자료형(List)로는 불가... => flux 사용
+                } catch (Exception e) {
+                }
+                sink.add(i);
+            } // 4.5초 소요
+            return Mono.just(sink);
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
     /**
