@@ -1,18 +1,48 @@
 package org.example.webflux.service.llmclient;
 
-import org.example.webflux.model.user.llmclient.LlmChatRequestDto;
-import org.example.webflux.model.user.llmclient.LlmChatResponseDto;
-import org.example.webflux.model.user.llmclient.LlmType;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.example.webflux.model.llmclient.LlmChatRequestDto;
+import org.example.webflux.model.llmclient.LlmChatResponseDto;
+import org.example.webflux.model.llmclient.LlmType;
+import org.example.webflux.model.llmclient.gpt.request.GptChatRequestDto;
+import org.example.webflux.model.llmclient.gpt.response.GptChatResponseDto;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-public class GptWebClientService implements LlmWebClientService{
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class GptWebClientService implements LlmWebClientService {
+
+    private final WebClient webClient;
+    @Value("${llm.gpt.key}")
+    private String gptApiKey;
+
     @Override
     public Mono<LlmChatResponseDto> getChatCompletion(LlmChatRequestDto requestDto) {
-        return null;
+        GptChatRequestDto gptChatRequestDto = new GptChatRequestDto(requestDto);
+        return webClient.post()
+                .uri("https://api.openai.com/v1/chat/completions")
+                .header("Authorization", "Bearer " + gptApiKey)
+                .bodyValue(gptChatRequestDto)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, (clientResponse -> {
+                    return clientResponse.bodyToMono(GptChatResponseDto.class).flatMap(body -> {
+                        log.error("Error Response: {}", body);
+                        return Mono.error(new RuntimeException("API 요청 실패 : " + body));
+                    });
+                }))
+                .bodyToMono(GptChatResponseDto.class)
+                .map(LlmChatResponseDto::new);
     }
 
     @Override
     public LlmType getLlmType() {
-        return null;
+        return LlmType.GPT;
     }
+
 }

@@ -1,8 +1,8 @@
 package org.example.webflux.service.llmclient;
 
-import org.example.webflux.model.user.llmclient.LlmChatRequestDto;
-import org.example.webflux.model.user.llmclient.LlmChatResponseDto;
-import org.example.webflux.model.user.llmclient.LlmType;
+import org.example.webflux.model.llmclient.LlmChatRequestDto;
+import org.example.webflux.model.llmclient.LlmChatResponseDto;
+import org.example.webflux.model.llmclient.LlmType;
 import reactor.core.publisher.Mono;
 
 public interface LlmWebClientService {

@@ -1,5 +1,6 @@
-package org.example.webflux.model.user.llmclient;
+package org.example.webflux.model.llmclient;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -12,4 +13,10 @@ public enum LlmModel {
 
     private final String code;
     private final LlmType llmType;
+
+    @JsonValue
+    @Override
+    public String toString() {
+        return code;
+    }
 }
