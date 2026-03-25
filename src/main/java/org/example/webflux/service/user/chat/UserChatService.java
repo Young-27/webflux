@@ -1,0 +1,9 @@
+package org.example.webflux.service.user.chat;
+
+import org.example.webflux.model.user.chat.UserChatRequestDto;
+import org.example.webflux.model.user.chat.UserChatResponseDto;
+import reactor.core.publisher.Mono;
+
+public interface UserChatService {
+    Mono<UserChatResponseDto> getOneShotChat(UserChatRequestDto userChatRequestDto);
+}
