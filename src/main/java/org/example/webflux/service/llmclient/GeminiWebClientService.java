@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -43,5 +44,22 @@ public class GeminiWebClientService implements LlmWebClientService{
     @Override
     public LlmType getLlmType() {
         return LlmType.GEMINI;
+    }
+
+    @Override
+    public Flux<LlmChatResponseDto> getChatCompletionStream(LlmChatRequestDto requestDto) {
+        GeminiChatRequestDto geminiChatRequestDto = new GeminiChatRequestDto(requestDto);
+        return webClient.post()
+                .uri("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?key=" + geminiApiKey) // 제미나이는 지피티와 다르게 url을 바꿔서 스트림으로 설정함
+                .bodyValue(geminiChatRequestDto)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, (clientResponse -> {
+                    return clientResponse.bodyToMono(String.class).flatMap(body -> {
+                        log.error("Error Response: {}", body);
+                        return Mono.error(new RuntimeException("API 요청 실패 : " + body));
+                    });
+                }))
+                .bodyToFlux(GeminiChatResponseDto.class)
+                .map(LlmChatResponseDto::new);
     }
 }

@@ -24,6 +24,10 @@ public class LlmChatResponseDto implements Serializable {
         this.llmResponse = gptChatResponseDto.getSingleChoice().getMessage().getContent();
     }
 
+    public static LlmChatResponseDto getLlmChatResponseDtoFromStream(GptChatResponseDto gptChatResponseDto) {
+        return new LlmChatResponseDto(gptChatResponseDto.getSingleChoice().getDelta().getContent());
+    }
+
     public LlmChatResponseDto(GeminiChatResponseDto geminiChatResponseDto) {
         this.llmResponse = geminiChatResponseDto.getSingleText();
     }
