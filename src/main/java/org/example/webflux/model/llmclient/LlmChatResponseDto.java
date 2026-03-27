@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.webflux.exception.CommonError;
 import org.example.webflux.model.llmclient.gemini.response.GeminiChatResponseDto;
 import org.example.webflux.model.llmclient.gpt.response.GptChatResponseDto;
 
@@ -19,6 +20,15 @@ public class LlmChatResponseDto implements Serializable {
     private static final long serialVersionUID = -6930497766224677701L;
 
     private String llmResponse;
+    private CommonError error;
+
+    public LlmChatResponseDto(CommonError error) {
+        this.error = error;
+    }
+
+    public LlmChatResponseDto(String llmResponse) {
+        this.llmResponse = llmResponse;
+    }
 
     public LlmChatResponseDto(GptChatResponseDto gptChatResponseDto) {
         this.llmResponse = gptChatResponseDto.getSingleChoice().getMessage().getContent();

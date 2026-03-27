@@ -2,6 +2,8 @@ package org.example.webflux.service.llmclient;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.webflux.exception.CustomErrorType;
+import org.example.webflux.exception.ErrorTypeException;
 import org.example.webflux.model.llmclient.LlmChatRequestDto;
 import org.example.webflux.model.llmclient.LlmChatResponseDto;
 import org.example.webflux.model.llmclient.LlmType;
@@ -36,7 +38,7 @@ public class GptWebClientService implements LlmWebClientService {
                 .onStatus(HttpStatusCode::is4xxClientError, (clientResponse -> {
                     return clientResponse.bodyToMono(GptChatResponseDto.class).flatMap(body -> {
                         log.error("Error Response: {}", body);
-                        return Mono.error(new RuntimeException("API 요청 실패 : " + body));
+                        return Mono.error(new ErrorTypeException("API 요청 실패 : " + body, CustomErrorType.GPT_RESPONSE_ERROR));
                     });
                 }))
                 .bodyToMono(GptChatResponseDto.class)
@@ -60,7 +62,7 @@ public class GptWebClientService implements LlmWebClientService {
                 .onStatus(HttpStatusCode::is4xxClientError, (clientResponse -> {
                     return clientResponse.bodyToMono(GptChatResponseDto.class).flatMap(body -> {
                         log.error("Error Response: {}", body);
-                        return Mono.error(new RuntimeException("API 요청 실패 : " + body));
+                        return Mono.error(new ErrorTypeException("API 요청 실패 : " + body, CustomErrorType.GPT_RESPONSE_ERROR));
                     });
                 }))
                 .bodyToFlux(GptChatResponseDto.class)

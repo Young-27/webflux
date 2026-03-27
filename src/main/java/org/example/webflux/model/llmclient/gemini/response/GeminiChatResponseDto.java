@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.webflux.exception.CustomErrorType;
+import org.example.webflux.exception.ErrorTypeException;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -23,7 +25,7 @@ public class GeminiChatResponseDto implements Serializable {
         return candidates.stream().findFirst()
                 .flatMap(candidate -> candidate.getContent().getParts().stream().findFirst()
                         .map(GeminiPart::getText))
-                .orElseThrow();
+                .orElseThrow(() -> new ErrorTypeException("[GeminiResponse] There is no choices.", CustomErrorType.GEMINI_RESPONSE_ERROR));
     }
 
 }
