@@ -19,8 +19,14 @@ public class LlmChatResponseDto implements Serializable {
     @Serial
     private static final long serialVersionUID = -6930497766224677701L;
 
+    private String title;
     private String llmResponse;
     private CommonError error;
+
+    public LlmChatResponseDto(String title, String llmResponse) {
+        this.title = title;
+        this.llmResponse = llmResponse;
+    }
 
     public LlmChatResponseDto(CommonError error) {
         this.error = error;
