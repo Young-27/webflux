@@ -13,4 +13,9 @@ import java.util.List;
 @Setter
 public class AnswerListResponseDto {
     private List<String> answerList;
+
+    @Override
+    public String toString() {
+        return String.join("\n\n", answerList);
+    }
 }

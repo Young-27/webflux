@@ -21,15 +21,15 @@ import reactor.core.publisher.Mono;
 public interface LlmWebClientService {
     Mono<LlmChatResponseDto> getChatCompletion(LlmChatRequestDto requestDto);
 
-    default Mono<LlmChatResponseDto> getChatCompletionCatchException(LlmChatRequestDto requestDto) {
+    default Mono<LlmChatResponseDto> getChatCompletionWithCatchException(LlmChatRequestDto requestDto) {
         return getChatCompletion(requestDto)
                 .onErrorResume(exception -> {
                     if (exception instanceof ErrorTypeException errorTypeException) {
                         CommonError commonError = new CommonError(errorTypeException.getErrorType().getCode(), errorTypeException.getMessage());
-                        return Mono.just(new LlmChatResponseDto(commonError));
+                        return Mono.just(new LlmChatResponseDto(commonError, errorTypeException));
                     } else {
                         CommonError commonError = new CommonError(500, exception.getMessage());
-                        return Mono.just(new LlmChatResponseDto(commonError));
+                        return Mono.just(new LlmChatResponseDto(commonError, exception));
                     }
                 });
     }
