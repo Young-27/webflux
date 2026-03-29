@@ -79,6 +79,7 @@ public class ChainOfThoughServiceImpl implements ChainOfThoughService{
                         }
                     }).doOnNext(publishedData -> sink.next(new UserChatResponseDto("필요한 작업 단계 분석", publishedData.toString())));
 
+            // Mono => Flux
             Flux<String> cotStepFlux = cotStepListMono.flatMapMany(cotStepList -> Flux.fromIterable(cotStepList.getAnswerList()));
 
             Flux<String> analyzedCotStep = cotStepFlux.flatMapSequential(cotStep -> {
@@ -87,6 +88,12 @@ public class ChainOfThoughServiceImpl implements ChainOfThoughService{
                         
                         사용자의 요구를 다음 단계에 따라 분석해주세요: %s
                         """, userRequest, cotStep);
+
+                // Flux마다 webclient를 호출 (총 3번)
+                // -> 3개 동시 대기, 하나 처리될때마다 이벤트 루프 할당
+                // -> 서로 다른 스레드 할당 받은 후 sink.next 호출
+                // -> 가장 늦게 처리된 스레드가 데이터를 모두 묶어서 collectList() 호출
+                // webflux를 사용함으로써 스레드는 대기 없이 일한다. 네트워크 i/o는 os가 대기해줌
                 return llmWebClientService.getChatCompletionWithCatchException(new LlmChatRequestDto(cotStepRequestPrompt, "", false, requestModel))
                         .map(LlmChatResponseDto::getLlmResponse);
             }).doOnNext(publishedData -> sink.next(new UserChatResponseDto("단계별 분석", publishedData)));
